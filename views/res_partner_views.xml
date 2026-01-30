@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_partner_form_voicenter" model="ir.ui.view">
+        <field name="name">res.partner.form.voicenter</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" type="object" name="action_view_calls" icon="fa-phone"
+                        invisible="voicenter_call_count == 0">
+                    <field name="voicenter_call_count" widget="statinfo" string="Phone Calls"/>
+                </button>
+            </xpath>
+            
+            <xpath expr="//page[@name='sales_purchases']" position="after">
+                <page name="voicenter_calls" string="Call History" invisible="voicenter_call_count == 0">
+                    <group>
+                        <group>
+                            <field name="voicenter_last_call_date"/>
+                            <field name="voicenter_total_call_duration"/>
+                        </group>
+                        <group>
+                            <field name="voicenter_call_count"/>
+                            <field name="voicenter_missed_call_count"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

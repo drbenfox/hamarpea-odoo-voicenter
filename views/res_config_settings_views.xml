@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.voicenter</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Voicenter" name="hamarpea-odoo-voicenter">
+                    <block title="Voicenter Integration">
+                        <setting>
+                            <label for="voicenter_api_token"/>
+                            <div class="text-muted">
+                                Your Voicenter API authentication token
+                            </div>
+                            <div class="content-group mt16">
+                                <field name="voicenter_api_token" password="True" placeholder="Enter your API token"/>
+                            </div>
+                            <div class="mt8">
+                                <button name="action_sync_now" string="Sync Now" type="object" class="btn-primary"/>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <field name="voicenter_auto_create_leads"/>
+                            <div class="text-muted">
+                                Automatically create leads for unknown incoming callers
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <field name="voicenter_create_activities"/>
+                            <div class="text-muted">
+                                Create follow-up activities for missed calls
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <block title="Sync Schedule">
+                        <setting string="Peak Hours">
+                            <div class="text-muted">
+                                Define your peak hours for smart scheduling
+                            </div>
+                            <div class="row mt8">
+                                <label for="voicenter_business_hours_start" string="Start Hour (0-23)" class="col-lg-3 o_light_label"/>
+                                <field name="voicenter_business_hours_start" class="col-lg-2"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="voicenter_business_hours_end" string="End Hour (0-23)" class="col-lg-3 o_light_label"/>
+                                <field name="voicenter_business_hours_end" class="col-lg-2"/>
+                            </div>
+                        </setting>
+                        
+                        <setting string="Sync Intervals">
+                            <div class="text-muted">
+                                How often to sync during peak and off-peak hours
+                            </div>
+                            <div class="row mt8">
+                                <label for="voicenter_peak_sync_interval" string="Peak Hours (minutes)" class="col-lg-3 o_light_label"/>
+                                <field name="voicenter_peak_sync_interval" class="col-lg-2"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="voicenter_off_peak_sync_interval" string="Off-Peak (minutes)" class="col-lg-3 o_light_label"/>
+                                <field name="voicenter_off_peak_sync_interval" class="col-lg-2"/>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action for Settings Menu -->
+    <record id="action_voicenter_settings" model="ir.actions.act_window">
+        <field name="name">Voicenter Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'hamarpea-odoo-voicenter'}</field>
+    </record>
+
+</odoo>

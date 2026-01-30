@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- List View -->
+    <record id="view_voicenter_call_log_tree" model="ir.ui.view">
+        <field name="name">voicenter.call.log.tree</field>
+        <field name="model">voicenter.call.log</field>
+        <field name="arch" type="xml">
+            <list string="Call Logs" decoration-danger="is_missed" decoration-success="is_answered" decoration-warning="needs_followup">
+                <field name="date"/>
+                <field name="caller_number"/>
+                <field name="target_number" optional="hide"/>
+                <field name="partner_name" optional="show"/>
+                <field name="lead_name" optional="show"/>
+                <field name="call_type" optional="hide"/>
+                <field name="dial_status"/>
+                <field name="duration" widget="integer" optional="show"/>
+                <field name="representative_name" optional="hide"/>
+                <field name="is_incoming" column_invisible="1"/>
+                <field name="is_answered" column_invisible="1"/>
+                <field name="is_missed" column_invisible="1"/>
+                <field name="needs_followup" column_invisible="1"/>
+                <field name="record_url" widget="url" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_voicenter_call_log_form" model="ir.ui.view">
+        <field name="name">voicenter.call.log.form</field>
+        <field name="model">voicenter.call.log</field>
+        <field name="arch" type="xml">
+            <form string="Call Log">
+                <header>
+                    <button name="action_open_recording" string="Play Recording" 
+                            type="object" class="btn-primary" 
+                            invisible="not record_url"/>
+                    <button name="action_mark_followup_done" string="Mark Follow-up Done" 
+                            type="object" class="btn-success"
+                            invisible="not needs_followup or followup_done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_partner" type="object" 
+                                class="oe_stat_button" icon="fa-user"
+                                invisible="not partner_id">
+                            <span class="o_stat_text">Contact</span>
+                        </button>
+                        <button name="action_open_lead" type="object" 
+                                class="oe_stat_button" icon="fa-star"
+                                invisible="not lead_id">
+                            <span class="o_stat_text">Lead</span>
+                        </button>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>
+                            <field name="call_type" readonly="1"/>
+                        </h1>
+                        <h2>
+                            <field name="date" readonly="1"/>
+                        </h2>
+                    </div>
+                    
+                    <group>
+                        <group string="Call Information">
+                            <field name="call_id" readonly="1"/>
+                            <field name="cdr_type" readonly="1"/>
+                            <field name="dial_status" readonly="1"/>
+                            <field name="is_incoming" readonly="1"/>
+                            <field name="is_outgoing" readonly="1"/>
+                            <field name="is_answered" readonly="1"/>
+                            <field name="is_missed" readonly="1"/>
+                        </group>
+                        
+                        <group string="Phone Numbers">
+                            <field name="caller_number" widget="phone" readonly="1"/>
+                            <field name="target_number" widget="phone" readonly="1"/>
+                            <field name="did" widget="phone" readonly="1"/>
+                            <field name="caller_extension" readonly="1"/>
+                            <field name="target_extension" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <group string="Duration">
+                            <field name="duration" widget="integer" readonly="1"/>
+                            <field name="ring_time" widget="integer" readonly="1"/>
+                        </group>
+                        
+                        <group string="Representative">
+                            <field name="representative_name" readonly="1"/>
+                            <field name="representative_code" readonly="1"/>
+                            <field name="user_name" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <group string="Recording">
+                            <field name="record_url" widget="url" readonly="1"/>
+                            <field name="record_expect" readonly="1"/>
+                        </group>
+                        
+                        <group string="Department">
+                            <field name="department_name" readonly="1"/>
+                            <field name="queue_name" readonly="1"/>
+                            <field name="price" readonly="1"/>
+                            <field name="target_prefix_name" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Follow-up Status">
+                        <field name="needs_followup"/>
+                        <field name="followup_done"/>
+                    </group>
+                    
+                    <notebook>
+                        <page name="advanced" string="IVR &amp; Custom Data">
+                            <group>
+                                <field name="dtmf_data" widget="text" readonly="1"/>
+                                <field name="custom_data" widget="text" readonly="1"/>
+                            </group>
+                        </page>
+                        <page name="system" string="System Info">
+                            <group>
+                                <field name="department_id_ext" readonly="1"/>
+                                <field name="synced_at" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_voicenter_call_log_search" model="ir.ui.view">
+        <field name="name">voicenter.call.log.search</field>
+        <field name="model">voicenter.call.log</field>
+        <field name="arch" type="xml">
+            <search string="Call Logs">
+                <field name="caller_number"/>
+                <field name="target_number"/>
+                <field name="partner_id"/>
+                <field name="lead_id"/>
+                <field name="representative_name"/>
+                <field name="call_id"/>
+                
+                <filter string="Incoming" name="filter_incoming" domain="[('is_incoming', '=', True)]"/>
+                <filter string="Outgoing" name="filter_outgoing" domain="[('is_outgoing', '=', True)]"/>
+                <separator/>
+                <filter string="Answered" name="filter_answered" domain="[('is_answered', '=', True)]"/>
+                <filter string="Missed" name="filter_missed" domain="[('is_missed', '=', True)]"/>
+                <separator/>
+                <filter string="Needs Follow-up" name="filter_followup" domain="[('needs_followup', '=', True)]"/>
+                <separator/>
+                <filter string="Today" name="filter_today" domain="[('date', '&gt;=', datetime.datetime.now().replace(hour=0, minute=0, second=0))]"/>
+                <filter string="This Week" name="filter_week" domain="[('date', '&gt;=', (datetime.datetime.now() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <filter string="This Month" name="filter_month" domain="[('date', '&gt;=', (datetime.datetime.now() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:day'}"/>
+                    <filter string="Contact" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Lead" name="group_lead" context="{'group_by': 'lead_id'}"/>
+                    <filter string="Representative" name="group_representative" context="{'group_by': 'representative_name'}"/>
+                    <filter string="Call Type" name="group_type" context="{'group_by': 'call_type'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'dial_status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Graph View - THIS WAS MISSING -->
+    <record id="view_voicenter_call_log_graph" model="ir.ui.view">
+        <field name="name">voicenter.call.log.graph</field>
+        <field name="model">voicenter.call.log</field>
+        <field name="arch" type="xml">
+            <graph string="Call Statistics" type="bar">
+                <field name="date" interval="day" type="row"/>
+                <field name="is_answered" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_voicenter_call_log" model="ir.actions.act_window">
+        <field name="name">Call Logs</field>
+        <field name="res_model">voicenter.call.log</field>
+        <field name="view_mode">list,form,graph</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No call logs found
+            </p>
+            <p>
+                Call logs will appear here automatically after syncing with Voicenter.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_voicenter_missed_calls" model="ir.actions.act_window">
+        <field name="name">Missed Calls</field>
+        <field name="res_model">voicenter.call.log</field>
+        <field name="view_mode">list,form,graph</field>
+        <field name="domain">[('is_missed', '=', True)]</field>
+        <field name="context">{'search_default_filter_missed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No missed calls found
+            </p>
+            <p>
+                Missed calls will appear here automatically after syncing with Voicenter.
+            </p>
+        </field>
+    </record>
+
+    <!-- Graph Statistics Action -->
+    <record id="action_voicenter_call_stats" model="ir.actions.act_window">
+        <field name="name">Call Statistics</field>
+        <field name="res_model">voicenter.call.log</field>
+        <field name="view_mode">graph,list,form</field>
+        <field name="domain">[('is_incoming', '=', True)]</field>
+        <field name="context">{'search_default_filter_week': 1}</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No call data to display
+            </p>
+            <p>
+                Statistics will appear here after syncing calls from Voicenter.
+            </p>
+        </field>
+    </record>
+
+    <!-- Link graph view to stats action -->
+    <record id="action_voicenter_call_stats_view_graph" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_voicenter_call_log_graph"/>
+        <field name="act_window_id" ref="action_voicenter_call_stats"/>
+    </record>
+
+</odoo>

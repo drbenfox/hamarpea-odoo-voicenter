@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Main Menu -->
+    <menuitem id="menu_voicenter_root" 
+              name="Voicenter" 
+              sequence="60" 
+              web_icon="hamarpea-odoo-voicenter,static/description/icon.png"/>
+    
+    <!-- Sub Menus -->
+    <menuitem id="menu_voicenter_calls" 
+              name="Calls" 
+              parent="menu_voicenter_root" 
+              sequence="10"/>
+    
+    <menuitem id="menu_voicenter_call_logs" 
+              name="All Calls" 
+              parent="menu_voicenter_calls" 
+              action="action_voicenter_call_log" 
+              sequence="10"/>
+    
+    <menuitem id="menu_voicenter_missed_calls" 
+              name="Missed Calls" 
+              parent="menu_voicenter_calls" 
+              action="action_voicenter_missed_calls" 
+              sequence="20"/>
+    
+    <menuitem id="menu_voicenter_call_stats" 
+              name="Call Statistics" 
+              parent="menu_voicenter_calls" 
+              action="action_voicenter_call_stats" 
+              sequence="30"/>
+    
+    <!-- Configuration Menu -->
+    <menuitem id="menu_voicenter_config" 
+              name="Configuration" 
+              parent="menu_voicenter_root" 
+              sequence="100"
+              groups="base.group_system"/>
+    
+    <menuitem id="menu_voicenter_settings" 
+              name="Settings" 
+              parent="menu_voicenter_config" 
+              action="action_voicenter_settings" 
+              sequence="10"
+              groups="base.group_system"/>
+
+</odoo>
