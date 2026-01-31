@@ -6,12 +6,12 @@
         <field name="name">voicenter.call.log.tree</field>
         <field name="model">voicenter.call.log</field>
         <field name="arch" type="xml">
-            <list string="Call Logs" decoration-danger="is_missed" decoration-success="is_answered" decoration-warning="needs_followup">
+            <list string="Call Logs" decoration-danger="is_missed" decoration-success="is_answered" decoration-warning="needs_followup" create="false" edit="false" delete="false">
                 <field name="date"/>
                 <field name="caller_number"/>
                 <field name="target_number" optional="hide"/>
-                <field name="partner_name" optional="show"/>
-                <field name="lead_name" optional="show"/>
+                <field name="partner_id" optional="show" widget="many2one_clickable"/>
+                <field name="lead_id" optional="show" widget="many2one_clickable"/>
                 <field name="call_type" optional="hide"/>
                 <field name="dial_status"/>
                 <field name="duration" widget="integer" optional="show"/>

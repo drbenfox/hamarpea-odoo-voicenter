@@ -239,8 +239,9 @@ class VoicenterCallLog(models.Model):
         api_token = ICPSudo.get_param('voicenter.api_token')
 
         if not api_token:
-            _logger.warning("Voicenter API token not configured")
-            return
+            error_msg = "Voicenter API token not configured. Please configure it in Settings > Voicenter."
+            _logger.error(error_msg)
+            raise UserError(_(error_msg))
 
         # Determine date range
         to_date = datetime.now()
@@ -286,17 +287,18 @@ class VoicenterCallLog(models.Model):
         }
 
         try:
+            _logger.info(f"Making API request to {url}")
             response = requests.post(url, json=payload, timeout=30)
             response.raise_for_status()
             data = response.json()
 
             if data.get('ERROR_NUMBER', 0) != 0:
-                _logger.error(
-                    f"Voicenter API error: {data.get('ERROR_DESCRIPTION')}")
-                return
+                error_msg = f"Voicenter API error: {data.get('ERROR_DESCRIPTION', 'Unknown error')}"
+                _logger.error(error_msg)
+                raise UserError(_(error_msg))
 
             cdr_list = data.get('CDR_LIST', [])
-            _logger.info(f"Retrieved {len(cdr_list)} calls from Voicenter")
+            _logger.info(f"Successfully retrieved {len(cdr_list)} calls from Voicenter API")
 
             created_count = 0
             updated_count = 0
@@ -322,9 +324,22 @@ class VoicenterCallLog(models.Model):
             # After sync, identify unclosed calls
             self._identify_unclosed_calls()
 
+        except requests.exceptions.Timeout:
+            error_msg = "Voicenter API request timed out. Please check your internet connection or try again later."
+            _logger.error(f"API timeout: {error_msg}")
+            raise UserError(_(error_msg))
+        except requests.exceptions.ConnectionError:
+            error_msg = "Could not connect to Voicenter API. Please check your internet connection."
+            _logger.error(f"Connection error: {error_msg}")
+            raise UserError(_(error_msg))
         except requests.exceptions.RequestException as e:
-            _logger.error(f"Error syncing from Voicenter: {str(e)}")
-            raise UserError(_("Failed to sync from Voicenter: %s") % str(e))
+            error_msg = f"Network error while syncing from Voicenter: {str(e)}"
+            _logger.error(error_msg)
+            raise UserError(_(error_msg))
+        except ValueError as e:
+            error_msg = f"Invalid response from Voicenter API: {str(e)}"
+            _logger.error(error_msg)
+            raise UserError(_(error_msg))
 
     @api.model
     def _prepare_call_values(self, cdr):
@@ -365,8 +380,8 @@ class VoicenterCallLog(models.Model):
             'queue_name': cdr.get('QueueName'),
             'price': cdr.get('Price', 0.0),
             'target_prefix_name': cdr.get('TargetPrefixName'),
-            'dtmf_data': json.dumps(cdr.get('DTMFData', [])) if cdr.get('DTMFData') else False,
-            'custom_data': json.dumps(cdr.get('CustomData', {})) if cdr.get('CustomData') else False,
+            'dtmf_data': json.dumps(cdr.get('DTMFData', []), ensure_ascii=False) if cdr.get('DTMFData') else False,
+            'custom_data': json.dumps(cdr.get('CustomData', {}), ensure_ascii=False) if cdr.get('CustomData') else False,
             'synced_at': fields.Datetime.now(),
         }
 
@@ -507,6 +522,32 @@ class VoicenterCallLog(models.Model):
         """Mark follow-up as completed"""
         self.write({'followup_done': True, 'needs_followup': False})
 
+    def action_sync_now(self):
+        """Manual sync button from list view"""
+        try:
+            self.env['voicenter.call.log'].sync_from_voicenter(hours_back=24)
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Voicenter Sync',
+                    'message': 'Call logs sync completed successfully',
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+        except Exception as e:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Voicenter Sync Failed',
+                    'message': str(e),
+                    'type': 'danger',
+                    'sticky': True,
+                }
+            }
+
     def action_open_recording(self):
         """Open call recording URL"""
         self.ensure_one()
@@ -554,6 +595,12 @@ class VoicenterCallLog(models.Model):
         Runs more frequently during business hours, less frequently at night
         """
         ICPSudo = self.env['ir.config_parameter'].sudo()
+
+        # Check if sync is enabled
+        sync_enabled = ICPSudo.get_param('voicenter.sync_enabled', 'True')
+        if sync_enabled.lower() in ('false', '0', 'no'):
+            _logger.info("Voicenter automatic sync is disabled")
+            return
 
         # Get configuration
         business_start = int(ICPSudo.get_param(

@@ -38,7 +38,14 @@
                     </block>
                     
                     <block title="Sync Schedule">
-                        <setting string="Peak Hours">
+                        <setting>
+                            <field name="voicenter_sync_enabled"/>
+                            <div class="text-muted">
+                                Enable or disable automatic synchronization
+                            </div>
+                        </setting>
+
+                        <setting string="Peak Hours" invisible="not voicenter_sync_enabled">
                             <div class="text-muted">
                                 Define your peak hours for smart scheduling
                             </div>
@@ -52,9 +59,9 @@
                             </div>
                         </setting>
                         
-                        <setting string="Sync Intervals">
+                        <setting string="Sync Intervals" invisible="not voicenter_sync_enabled">
                             <div class="text-muted">
-                                How often to sync during peak and off-peak hours
+                                How often to sync during peak and off-peak hours (1-60 minutes)
                             </div>
                             <div class="row mt8">
                                 <label for="voicenter_peak_sync_interval" string="Peak Hours (minutes)" class="col-lg-3 o_light_label"/>

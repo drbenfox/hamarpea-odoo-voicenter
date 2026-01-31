@@ -29,6 +29,7 @@
         'crm',
         'contacts',
         'mail',
+        'web_tree_many2one_clickable',
     ],
     'data': [
         'security/ir.model.access.csv',

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 
 
 class ResConfigSettings(models.TransientModel):
@@ -9,6 +10,13 @@ class ResConfigSettings(models.TransientModel):
         string='Voicenter API Token',
         config_parameter='voicenter.api_token',
         help='Your Voicenter API authentication token'
+    )
+
+    voicenter_sync_enabled = fields.Boolean(
+        string='Enable Automatic Sync',
+        config_parameter='voicenter.sync_enabled',
+        default=True,
+        help='Enable or disable automatic call log synchronization'
     )
     
     voicenter_sync_interval = fields.Integer(
@@ -59,6 +67,24 @@ class ResConfigSettings(models.TransientModel):
         default=True,
         help='Automatically create activities for missed calls needing follow-up'
     )
+
+    def set_values(self):
+        """Override to add validation before saving config parameters"""
+        # Validate business hours
+        if self.voicenter_business_hours_start < 0 or self.voicenter_business_hours_start > 23:
+            raise ValidationError(_('Business hours start must be between 0 and 23'))
+        if self.voicenter_business_hours_end < 0 or self.voicenter_business_hours_end > 23:
+            raise ValidationError(_('Business hours end must be between 0 and 23'))
+        if self.voicenter_business_hours_start >= self.voicenter_business_hours_end:
+            raise ValidationError(_('Business hours start must be before end time'))
+
+        # Validate sync intervals
+        if self.voicenter_peak_sync_interval < 1 or self.voicenter_peak_sync_interval > 60:
+            raise ValidationError(_('Peak sync interval must be between 1 and 60 minutes'))
+        if self.voicenter_off_peak_sync_interval < 1 or self.voicenter_off_peak_sync_interval > 60:
+            raise ValidationError(_('Off-peak sync interval must be between 1 and 60 minutes'))
+
+        super(ResConfigSettings, self).set_values()
 
     def action_sync_now(self):
         """Manual sync button"""
