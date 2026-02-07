@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
-                <app string="Voicenter" name="hamarpea-odoo-voicenter">
+                <app string="Voicenter" name="hamarpea_odoo_voicenter">
                     <block title="Voicenter Integration">
                         <setting>
                             <label for="voicenter_api_token"/>
@@ -84,7 +84,7 @@
         <field name="res_model">res.config.settings</field>
         <field name="view_mode">form</field>
         <field name="target">inline</field>
-        <field name="context">{'module': 'hamarpea-odoo-voicenter'}</field>
+        <field name="context">{'module': 'hamarpea_odoo_voicenter'}</field>
     </record>
 
 </odoo>

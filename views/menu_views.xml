@@ -5,7 +5,7 @@
     <menuitem id="menu_voicenter_root" 
               name="Voicenter" 
               sequence="60" 
-              web_icon="hamarpea-odoo-voicenter,static/description/icon.png"/>
+              web_icon="hamarpea_odoo_voicenter,static/description/icon.png"/>
     
     <!-- Sub Menus -->
     <menuitem id="menu_voicenter_calls" 
